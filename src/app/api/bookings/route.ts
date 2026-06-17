@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
-// GET /api/bookings - Retrieve all bookings with associated service details
+// GET /api/bookings - Retrieve all bookings with associated service and attendant details
 export async function GET() {
   try {
     const bookings = await prisma.booking.findMany({
       include: {
         service: true,
+        attendant: true,
       },
       orderBy: { createdAt: "desc" },
     });
@@ -25,7 +26,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { serviceId, name, phone, city, date, time, requirement } = body;
+    const { serviceId, name, phone, city, date, time, requirement, latitude, longitude } = body;
 
     // Field validations
     if (!serviceId || typeof serviceId !== "string") {
@@ -59,6 +60,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: `Service with ID '${serviceId}' not found.` }, { status: 404 });
     }
 
+    // Lookup Customer by phone to attach them if they exist
+    const customer = await prisma.customer.findUnique({
+      where: { phone },
+    });
+
     const newBooking = await prisma.booking.create({
       data: {
         serviceId,
@@ -68,12 +74,23 @@ export async function POST(request: Request) {
         date,
         time,
         requirement,
-        status: "PENDING",
+        latitude: typeof latitude === 'number' ? latitude : null,
+        longitude: typeof longitude === 'number' ? longitude : null,
+        status: "Pending",
+        customerId: customer?.id || null,
       },
       include: {
         service: true,
+        attendant: true,
       },
     });
+
+    if (customer) {
+      await prisma.customer.update({
+        where: { id: customer.id },
+        data: { totalBookings: customer.totalBookings + 1 }
+      });
+    }
 
     return NextResponse.json(newBooking, { status: 201 });
   } catch (error: any) {

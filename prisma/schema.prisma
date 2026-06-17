@@ -17,7 +17,7 @@ model Service {
   iconName      String    // e.g. "Plane", "Train", "HeartPulse"
   gradient      String    // e.g. "from-[#FF9E7D] to-[#E07A5F]"
   createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  updatedAt     DateTime @updatedAt
   bookings      Booking[]
 }
 
@@ -31,7 +31,13 @@ model Booking {
   date        String
   time        String
   requirement String
-  status      String   @default("PENDING") // PENDING, CONFIRMED, COMPLETED, CANCELLED
+  status      String   @default("PENDING") // PENDING, CONFIRMED, COMPLETED, CANCELLED, etc.
+  attendantId String?
+  attendant   Attendant? @relation(fields: [attendantId], references: [id])
+  customerId  String?
+  customer    Customer?  @relation(fields: [customerId], references: [id])
+  latitude    Float?
+  longitude   Float?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -45,6 +51,11 @@ model Attendant {
   rating         Float
   certifications String[]
   bgGradient     String
+  bookings       Booking[]
+  account        AttendantAccount?
+  location       AttendantLocation?
+  notifications  Notification[]
+  sessions       SessionLog[]
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 }
@@ -81,4 +92,83 @@ model Testimonial {
   bgClass   String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+// New enums for operational status
+enum AttendantStatus {
+  AVAILABLE
+  BUSY
+  OFFLINE
+  ON_DUTY
+}
+
+enum CustomerVerificationStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum BookingStatus {
+  PENDING
+  ASSIGNED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+model Customer {
+  id                 String   @id @default(uuid())
+  name               String
+  phone              String   @unique
+  email              String?
+  verificationStatus CustomerVerificationStatus @default(PENDING)
+  idDocumentType     String?
+  idDocumentBase64   String?
+  verificationDate   DateTime?
+  totalBookings      Int      @default(0)
+  bookings           Booking[]
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+// New models for authentication, location, notifications, and sessions
+model AttendantAccount {
+  id           String   @id @default(uuid())
+  attendant    Attendant @relation(fields: [attendantId], references: [id])
+  attendantId  String   @unique
+  mobileNumber String   @unique
+  passwordHash String
+  status       AttendantStatus @default(AVAILABLE)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model AttendantLocation {
+  id           String   @id @default(uuid())
+  attendant    Attendant @relation(fields: [attendantId], references: [id])
+  attendantId  String   @unique
+  city         String
+  latitude     Float
+  longitude    Float
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Notification {
+  id           String   @id @default(uuid())
+  type         String   // e.g., NEW_BOOKING, ASSIGNMENT, COMPLETED, EMERGENCY, FEEDBACK
+  message      String
+  attendant    Attendant? @relation(fields: [attendantId], references: [id])
+  attendantId  String?
+  read         Boolean @default(false)
+  createdAt    DateTime @default(now())
+}
+
+model SessionLog {
+  id           String   @id @default(uuid())
+  token        String   @unique
+  expiresAt    DateTime
+  attendant    Attendant? @relation(fields: [attendantId], references: [id])
+  attendantId  String?
+  createdAt    DateTime @default(now())
 }
