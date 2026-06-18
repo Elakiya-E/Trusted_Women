@@ -55,7 +55,7 @@ export default function Hero({ onBookNowClick }: HeroProps) {
   const fadeUp = (delay = 0) => ({
     initial: { opacity: 0, y: 30 },
     animate: { opacity: 1, y: 0 },
-    transition: { delay, duration: 0.6, ease: [0.22, 1, 0.36, 1] },
+    transition: { delay, duration: 0.6 },
   });
 
   const buttonHover = { scale: 1.04 };

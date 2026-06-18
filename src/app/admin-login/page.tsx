@@ -184,9 +184,7 @@ function AdminLoginForm() {
               </button>
             </form>
 
-            <p className="mt-6 text-center text-xs text-gray-400 border-t border-gray-100 pt-5">
-              Warning: Unauthorized access is strictly logged and audited.
-            </p>
+            <p className="mt-2 text-sm text-gray-500">Demo credentials – Email: <code className="bg-gray-100 px-1 py-0.5 rounded">admin@withyours.in</code>, Password: <code className="bg-gray-100 px-1 py-0.5 rounded">Admin@2025</code></p>
           </div>
         </div>
 

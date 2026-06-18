@@ -67,7 +67,7 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
     await new Promise((r) => setTimeout(r, 800));
 
     const found = ADMIN_CREDENTIALS.find(
-      (c) => c.email.toLowerCase() === email.toLowerCase() && c.password === password
+      (c) => c.email.toLowerCase() === email.trim().toLowerCase() && c.password === password.trim()
     );
 
     if (!found) {
