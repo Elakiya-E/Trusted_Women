@@ -1,8 +1,26 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
+import dynamic from "next/dynamic";
 import DashboardLayout from "@/components/DashboardLayout";
 import Link from "next/link";
+import {
+  enrichCityStatsFromApi,
+  applyMapFilters,
+  DEFAULT_TOP_LOCATIONS,
+} from "@/lib/indiaMapData";
+
+const IndiaBookingMap = dynamic(
+  () => import("@/components/IndiaBookingMap"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-[420px] w-full rounded-xl bg-gradient-to-br from-indigo-50 to-purple-50 animate-pulse flex items-center justify-center border border-gray-200">
+        <span className="text-sm text-gray-400 font-medium">Loading India map…</span>
+      </div>
+    ),
+  }
+);
 import {
   ShoppingCart,
   Users,
@@ -68,29 +86,6 @@ const statusStyles: Record<string, string> = {
 
 const COLORS = ["#4f46e5", "#10b981", "#f59e0b", "#ef4444", "#6366f1", "#ec4899", "#14b8a6"];
 
-// ─── Simplified India SVG path ────────────────────────────────────────────────
-const INDIA_PATH = `
-  M 190 30 L 215 25 L 250 35 L 275 55 L 300 60 L 325 80 L 340 105
-  L 345 130 L 340 155 L 350 180 L 345 205 L 330 225 L 310 240
-  L 295 270 L 280 300 L 265 325 L 250 355 L 245 380
-  L 235 370 L 220 345 L 200 320 L 185 295 L 170 265
-  L 155 240 L 140 215 L 130 190 L 120 165 L 115 140
-  L 120 115 L 130 90 L 145 70 L 160 55 L 175 40 Z
-`;
-
-// Approximate city positions on the SVG map
-const CITY_POSITIONS: Record<string, { x: number; y: number }> = {
-  Chennai:    { x: 310, y: 280 },
-  Bengaluru:  { x: 255, y: 290 },
-  Hyderabad:  { x: 265, y: 225 },
-  Coimbatore: { x: 240, y: 310 },
-  Mumbai:     { x: 175, y: 210 },
-  Delhi:      { x: 215, y: 95  },
-  Kolkata:    { x: 320, y: 170 },
-  Pune:       { x: 195, y: 230 },
-  Madurai:    { x: 270, y: 330 },
-};
-
 // ─── Page Component ───────────────────────────────────────────────────────────
 export default function AdminDashboardPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -123,7 +118,20 @@ export default function AdminDashboardPage() {
   // ── Derived values ──
   const kpis = analytics?.kpis;
   const cityStats      = analytics?.cityStats ?? [];
-  const topLocations   = analytics?.topLocations ?? [];
+  const topLocations   =
+    analytics?.topLocations && analytics.topLocations.length > 0
+      ? analytics.topLocations
+      : DEFAULT_TOP_LOCATIONS;
+
+  const mapCityData = useMemo(() => {
+    const enriched = enrichCityStatsFromApi(cityStats);
+    return applyMapFilters(enriched, filterPeriod, filterCity, filterService);
+  }, [cityStats, filterPeriod, filterCity, filterService]);
+
+  const filteredCityStats = useMemo(
+    () => mapCityData.map((c) => ({ city: c.city, bookings: c.bookings })),
+    [mapCityData]
+  );
   const repeatData     = analytics?.repeatData ?? [];
   const retentionPct   = analytics?.retentionPct ?? 0;
   const serviceDemand  = analytics?.serviceDemand ?? [];
@@ -166,8 +174,19 @@ export default function AdminDashboardPage() {
   const recentBookingsList = bookings.slice(0, 5);
 
   // Unique cities and services for filter dropdowns (from real data)
-  const uniqueCities   = Array.from(new Set(bookings.map(b => b.city.trim()))).sort();
-  const uniqueServices = Array.from(new Set(bookings.map(b => b.service?.title).filter(Boolean))).sort();
+  const uniqueCities   = Array.from(
+    new Set([
+      ...bookings.map(b => b.city.trim()),
+      "Chennai", "Bengaluru", "Hyderabad", "Coimbatore", "Madurai", "Mumbai", "Delhi",
+    ])
+  ).sort();
+  const uniqueServices = Array.from(
+    new Set([
+      ...bookings.map(b => b.service?.title).filter(Boolean),
+      "Hospital Attendant", "Airport Pickup", "Elderly Care", "Railway Pickup",
+      "Home Support", "Women Driver",
+    ])
+  ).sort();
 
   const GrowthBadge = ({ g }: { g: string }) =>
     g === "up"   ? <span className="text-emerald-600 font-bold text-xs">▲ Up</span>
@@ -243,44 +262,18 @@ export default function AdminDashboardPage() {
         {/* ── SECTION 2 + 3 – INDIA MAP & TOP LOCATIONS ──────────── */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-          {/* India Booking Map */}
+          {/* India Booking Map — interactive Leaflet choropleth */}
           <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <MapPin className="h-4 w-4 text-purple-600" />
-              <h2 className="font-bold text-gray-900">India Booking Map</h2>
+            <div className="flex items-center justify-between gap-2 mb-4">
+              <div className="flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-purple-600" />
+                <h2 className="font-bold text-gray-900">India Booking Map</h2>
+              </div>
+              <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
+                Pan · Zoom · Hover
+              </span>
             </div>
-            {cityStats.length === 0 ? (
-              <p className="text-sm text-gray-400 text-center py-8">No city data available yet.</p>
-            ) : (
-              <>
-                <div className="flex items-center justify-center">
-                  <svg viewBox="100 20 260 380" className="w-full max-w-xs h-auto">
-                    <path d={INDIA_PATH} fill="#f0f0fa" stroke="#c4b5fd" strokeWidth="2" />
-                    {cityStats.map(c => {
-                      const pos = CITY_POSITIONS[c.city] || { x: 230, y: 200 };
-                      const r = Math.max(10, Math.sqrt(c.bookings) * 3);
-                      return (
-                        <g key={c.city}>
-                          <circle cx={pos.x} cy={pos.y} r={r} fill="#4f46e5" fillOpacity={0.25} stroke="#4f46e5" strokeWidth="1.5" />
-                          <circle cx={pos.x} cy={pos.y} r={4} fill="#4f46e5" />
-                          <text x={pos.x + 8} y={pos.y + 4} fontSize="9" fill="#374151" fontWeight="600">{c.city}</text>
-                          <text x={pos.x + 8} y={pos.y + 14} fontSize="8" fill="#6b7280">{c.bookings} bookings</text>
-                          <title>{c.city} – {c.bookings} bookings</title>
-                        </g>
-                      );
-                    })}
-                  </svg>
-                </div>
-                <div className="flex flex-wrap gap-3 mt-3 justify-center">
-                  {cityStats.map(c => (
-                    <div key={c.city} className="flex items-center gap-1.5 text-xs text-gray-600">
-                      <span className="inline-block w-2.5 h-2.5 rounded-full bg-indigo-500 opacity-70" />
-                      {c.city}: <strong>{c.bookings}</strong>
-                    </div>
-                  ))}
-                </div>
-              </>
-            )}
+            <IndiaBookingMap cities={mapCityData} />
           </div>
 
           {/* Section 3 – Top 3 Locations */}
@@ -289,27 +282,23 @@ export default function AdminDashboardPage() {
               <TrendingUp className="h-4 w-4 text-purple-600" />
               <h2 className="font-bold text-gray-900">Top 3 Locations</h2>
             </div>
-            {topLocations.length === 0 ? (
-              <p className="text-sm text-gray-400 text-center py-8">No location data yet.</p>
-            ) : (
-              <div className="space-y-4 flex-1">
-                {topLocations.map((loc, i) => (
-                  <div key={loc.rank} className="flex items-center gap-4 p-3 rounded-xl bg-gray-50 hover:bg-purple-50 transition-colors">
-                    <span className="text-2xl">{medals[i] || `#${loc.rank}`}</span>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-gray-900 text-sm truncate">{loc.name}</p>
-                      <p className="text-xs text-gray-500">{loc.bookings} bookings · {loc.pct}% of total</p>
-                    </div>
-                    <GrowthBadge g={loc.trend} />
+            <div className="space-y-4 flex-1">
+              {topLocations.map((loc, i) => (
+                <div key={loc.rank} className="flex items-center gap-4 p-3 rounded-xl bg-gray-50 hover:bg-purple-50 transition-colors">
+                  <span className="text-2xl">{medals[i] || `#${loc.rank}`}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-gray-900 text-sm truncate">{loc.name}</p>
+                    <p className="text-xs text-gray-500">{loc.bookings} bookings · {loc.pct}% of total</p>
                   </div>
-                ))}
-              </div>
-            )}
-            {cityStats.length > 0 && (
+                  <GrowthBadge g={loc.trend} />
+                </div>
+              ))}
+            </div>
+            {filteredCityStats.length > 0 && (
               <div className="mt-4 pt-4 border-t border-gray-100">
                 <p className="text-xs text-gray-500 mb-2 font-medium">City Distribution</p>
                 <ResponsiveContainer width="100%" height={120}>
-                  <BarChart data={cityStats} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+                  <BarChart data={filteredCityStats} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
                     <XAxis dataKey="city" tick={{ fontSize: 10 }} />
                     <YAxis tick={{ fontSize: 10 }} />
                     <Tooltip />

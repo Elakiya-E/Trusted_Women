@@ -5,8 +5,16 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area, CartesianGrid } from "recharts";
 import { format } from "date-fns";
 
+interface KpiCardProps {
+  icon: React.ReactNode;
+  label: string;
+  value: string | number;
+  change?: string;
+  up?: boolean;
+}
+
 // Simple KPI Card component
-function KpiCard({ icon, label, value, change, up }) {
+function KpiCard({ icon, label, value, change, up }: KpiCardProps) {
   return (
     <div className="kpi-card bg-white rounded-xl shadow-sm p-5 flex items-center space-x-3">
       <div className="text-primary text-2xl">{icon}</div>
@@ -83,7 +91,7 @@ export default function AdminAnalytics() {
               {/* Outline of India (very simplified) */}
               <path d="M200,20 L260,80 L300,150 L260,220 L200,260 L140,220 L100,150 L140,80 Z" fill="#e5e7eb" stroke="#9ca3af" strokeWidth="2" />
               {cityStats.map((c, i) => {
-                const positions = {
+                const positions: Record<string, number[]> = {
                   Bengaluru: [260, 150],
                   Chennai: [320, 180],
                   Hyderabad: [240, 200],

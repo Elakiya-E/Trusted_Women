@@ -1,11 +1,9 @@
 /*
   Hero Section redesign – Trusted Women
-  • Uses primary palette #4F46E5, secondary #14B8A6
-  • Typography: Plus Jakarta Sans (fallback Inter)
-  • Left side (55%): badge, headline, subheadline, CTA, trust indicators
-  • Right side (45%): auto‑sliding image gallery (img8.png, img8.2.png, img83.png, img84.png)
-  • Gallery: fade transition every 4 s, subtle zoom, overlay, rounded corners, soft shadow
-  • Animations via Framer Motion (fade up, hover, button scale)
+  • Premium full-width hero with animated background gallery
+  • Glassmorphism content card on the left
+  • 4-second fade and zoom transitions
+  • Mobile-auto height, desktop 85vh
 */
 
 "use client";
@@ -13,192 +11,108 @@
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { PhoneCall, CheckCircle2, Star, Users, Shield } from "lucide-react";
+import { PhoneCall, CheckCircle2 } from "lucide-react";
 
-// Images placed in /public folder – Next.js will serve them automatically
-const galleryImages = [
-  "/img8.png",
-  "/img8.2.png",
-  "/img83.png",
-  "/img84.png",
-];
+const heroImages = ["/img8.png", "/img8.2.png", "/img83.png", "/img84.png"];
+
 interface HeroProps {
   onBookNowClick: () => void;
 }
 
-// Color palette per specification
-const COLORS = {
-  primary: "#4F46E5",
-  secondary: "#14B8A6",
-  text: "#111827",
-  background: "#F8FAFC",
-  cardBg: "#FFFFFF",
-  border: "#E5E7EB",
-  hoverAccent: "#EEF2FF",
-};
-
-// Typography (Plus Jakarta Sans fallback Inter) – assumed globally via CSS import
-
 export default function Hero({ onBookNowClick }: HeroProps) {
-  // ---------- Gallery logic ----------
-  const images = ["/img8.png", "/img8.2.png", "/img83.png", "/img84.png"];
-  const [current, setCurrent] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrent((i) => (i + 1) % images.length);
-    }, 4000); // 4 seconds per slide
-    return () => clearInterval(timer);
+    const timer = window.setInterval(() => {
+      setCurrentIndex((index) => (index + 1) % heroImages.length);
+    }, 4000);
+    return () => window.clearInterval(timer);
   }, []);
 
-  // ---------- Animation helpers ----------
-  const fadeUp = (delay = 0) => ({
-    initial: { opacity: 0, y: 30 },
-    animate: { opacity: 1, y: 0 },
-    transition: { delay, duration: 0.6 },
-  });
-
-  const buttonHover = { scale: 1.04 };
-  const buttonTap = { scale: 0.97 };
-
   return (
-    <section
-      id="home"
-      className="relative overflow-hidden"
-      style={{
-        background: COLORS.background,
-        paddingTop: 120,
-        paddingBottom: 100,
-      }}
-    >
-      {/* ----- Main container ----- */}
-      <div className="mx-auto max-w-[1280px] px-5 sm:px-8 flex flex-col lg:flex-row items-center gap-12 lg:gap-8">
-        {/* ----- LEFT (55%) ----- */}
-        <motion.div className="w-full lg:w-[55%]" {...fadeUp(0)}>
-          {/* Badge */}
-          <motion.span
-            {...fadeUp(0.1)}
-            className="inline-flex items-center gap-2 rounded-full px-4 py-1 text-sm font-medium mb-6"
-            style={{
-              background: `${COLORS.primary}20`, // 20% opacity
-              color: COLORS.primary,
-              border: `1px solid ${COLORS.primary}40`,
-            }}
+    <section id="home" className="relative w-full overflow-hidden min-h-[72vh] lg:min-h-[85vh] bg-slate-950">
+      <div className="absolute inset-0 overflow-hidden">
+        {heroImages.map((src, idx) => (
+          <motion.div
+            key={src}
+            className="absolute inset-0"
+            style={{ zIndex: currentIndex === idx ? 10 : 0 }}
+            initial={false}
+            animate={
+              currentIndex === idx
+                ? { opacity: 1, scale: 1.03 }
+                : { opacity: 0, scale: 1 }
+            }
+            transition={{ duration: 1.2, ease: "easeInOut" }}
           >
-            🛡️ Trusted by Families Across Bengaluru
-          </motion.span>
-
-          {/* Headline */}
-          <motion.h1
-            {...fadeUp(0.18)}
-            className="mb-5"
-            style={{
-              fontFamily: "'Plus Jakarta Sans', Inter, sans-serif",
-              fontSize: "48px",
-              fontWeight: 700,
-              lineHeight: 1.1,
-              color: COLORS.text,
-              maxWidth: "600px",
-            }}
-          >
-            <span style={{ color: COLORS.primary }}>Trusted Women Attendants</span> for Every Stage of Care
-          </motion.h1>
-
-          {/* Subheadline */}
-          <motion.p
-            {...fadeUp(0.26)}
-            className="mb-8"
-            style={{
-              fontFamily: "'Plus Jakarta Sans', Inter, sans-serif",
-              fontSize: "18px",
-              lineHeight: 1.7,
-              color: COLORS.text,
-              maxWidth: "540px",
-            }}
-          >
-            Safe, verified and compassionate support for elderly care, hospital assistance, travel support and home services.
-          </motion.p>
-
-          {/* CTA Buttons */}
-          <motion.div {...fadeUp(0.34)} className="flex flex-wrap items-center gap-4 mb-8">
-            <motion.button
-              whileHover={buttonHover}
-              whileTap={buttonTap}
-              onClick={onBookNowClick}
-              className="rounded-xl px-7 py-3 text-base font-semibold text-white shadow-lg cursor-pointer"
-              style={{
-                background: COLORS.primary,
-                border: `1px solid ${COLORS.primary}`,
-              }}
-            >
-              Book a Service
-            </motion.button>
-
-            <motion.a
-              whileHover={buttonHover}
-              whileTap={buttonTap}
-              href="tel:+919876543210"
-              className="inline-flex items-center gap-2 rounded-xl border px-6 py-3 text-base font-semibold cursor-pointer"
-              style={{
-                borderColor: COLORS.border,
-                background: COLORS.cardBg,
-                color: COLORS.text,
-              }}
-            >
-              <PhoneCall className="h-4 w-4" />
-              Call Support
-            </motion.a>
+            <Image
+              src={src}
+              alt={`Hero background ${idx + 1}`}
+              fill
+              sizes="100vw"
+              className="object-cover object-center"
+              priority={idx === 0}
+            />
+            <div className="absolute inset-0 bg-black/20" />
           </motion.div>
-        </motion.div>
+        ))}
+      </div>
 
-        {/* ----- RIGHT (45%) ----- */}
+      <div className="relative z-10 mx-auto flex min-h-[72vh] lg:min-h-[85vh] items-center px-5 py-16 sm:px-8">
         <motion.div
-          className="relative w-full lg:w-[45%] h-[500px]"
-          {...fadeUp(0.4)}
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.9, ease: "easeOut" }}
+          className="w-full max-w-[1280px]"
         >
-          <div className="relative w-full h-full rounded-3xl overflow-hidden shadow-2xl">
-            {images.map((src, idx) => (
-              <motion.div
-                key={idx}
-                className="relative w-full h-full rounded-lg overflow-hidden"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 1.2, ease: "easeInOut" }}
-                style={{
-                  position: current === idx ? "relative" : "absolute",
-                  inset: 0,
-                  opacity: current === idx ? 1 : 0,
-                }}
+          <div className="w-full max-w-3xl rounded-[2rem] border border-white/15 bg-slate-950/35 p-8 shadow-[0_40px_120px_-60px_rgba(15,23,42,0.8)] backdrop-blur-xl">
+            <span className="mb-6 inline-flex rounded-full bg-white/15 px-4 py-2 text-sm font-semibold uppercase tracking-[0.16em] text-slate-100">
+              Premium care for every stage
+            </span>
+            <h1 className="text-4xl font-semibold leading-tight tracking-tight text-white sm:text-5xl">
+              Trusted Women Attendants for Every Stage of Care
+            </h1>
+            <p className="mt-5 max-w-2xl text-base leading-7 text-slate-100/90 sm:text-lg">
+              Safe, verified and compassionate support for elderly care, hospital assistance, travel support and home services.
+            </p>
+
+            <div className="mt-10 flex flex-wrap gap-4">
+              <motion.button
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={onBookNowClick}
+                className="inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-sky-500 to-cyan-500 px-8 py-3 text-base font-semibold text-white shadow-lg shadow-cyan-500/30 transition duration-300 hover:from-sky-400 hover:to-cyan-400"
               >
-                <Image
-                  src={src}
-                  alt={`Gallery slide ${idx + 1}`}
-                  fill
-                  priority={idx === 0}
-                  className="object-cover"
-                />
-                {/* Dark overlay for readability */}
-                <div className="absolute inset-0 bg-black/30" />
-              </motion.div>
-            ))}
-          </div>
-          {/* Statistic Cards */}
-          <div className="absolute top-4 left-4 space-y-2">
-            <motion.div className="flex items-center bg-white bg-opacity-80 px-3 py-1 rounded-full shadow" whileHover={{ scale: 1.05 }}>
-              <Star className="w-4 h-4 text-yellow-500 mr-1" /> <span>4.9 Customer Rating</span>
-            </motion.div>
-            <motion.div className="flex items-center bg-white bg-opacity-80 px-3 py-1 rounded-full shadow" whileHover={{ scale: 1.05 }}>
-              <Users className="w-4 h-4 text-indigo-500 mr-1" /> <span>500+ Verified Attendants</span>
-            </motion.div>
-            <motion.div className="flex items-center bg-white bg-opacity-80 px-3 py-1 rounded-full shadow" whileHover={{ scale: 1.05 }}>
-              <Shield className="w-4 h-4 text-red-500 mr-1" /> <span>24/7 Emergency Support</span>
-            </motion.div>
-          </div>
-          {/* Indicators */}
-          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
-            {images.map((_, i) => (
-              <span key={i} className={`w-2 h-2 rounded-full ${current===i ? 'bg-white' : 'bg-gray-400'}`}></span>
-            ))}
+                Book a Service
+              </motion.button>
+
+              <motion.a
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                href="tel:+919876543210"
+                className="inline-flex items-center justify-center rounded-2xl border border-white/25 bg-white/10 px-8 py-3 text-base font-semibold text-white transition duration-300 hover:border-white/40 hover:bg-white/20"
+              >
+                <PhoneCall className="mr-2 h-4 w-4" />
+                Call Support
+              </motion.a>
+            </div>
+
+            <div className="mt-8 grid gap-3 sm:grid-cols-2">
+              {[
+                "Verified Attendants",
+                "Police Verified",
+                "Transparent Pricing",
+                "24/7 Support",
+              ].map((text) => (
+                <div
+                  key={text}
+                  className="inline-flex items-center gap-2 rounded-2xl bg-white/10 px-4 py-3 text-sm font-medium text-slate-100 backdrop-blur"
+                >
+                  <CheckCircle2 className="h-4 w-4 text-emerald-300" />
+                  {text}
+                </div>
+              ))}
+            </div>
           </div>
         </motion.div>
       </div>

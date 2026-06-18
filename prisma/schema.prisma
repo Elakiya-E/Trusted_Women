@@ -56,6 +56,38 @@ model Attendant {
   location       AttendantLocation?
   notifications  Notification[]
   sessions       SessionLog[]
+
+  // New Profile Fields
+  email                 String?
+  address               String?
+  state                 String?  @default("Tamil Nadu")
+  pinCode               String?
+  emergencyContact      String?
+  profilePhotoBase64    String?
+  
+  // Service Specializations
+  selectedServices      String[]
+
+  // Uploaded Documents (base64)
+  aadhaarBase64         String?
+  aadhaarStatus         String   @default("Pending")
+  panBase64             String?
+  panStatus             String   @default("Pending")
+  dlBase64              String?
+  dlStatus              String   @default("Pending")
+  certificatesBase64    String?
+  certificatesStatus    String   @default("Pending")
+  policeVerifBase64     String?
+  policeVerifStatus     String   @default("Pending")
+
+  // Scheduler Preferences
+  workingDays           String[]
+  workingHours          String[]
+  preferredCities       String[]
+
+  // Verification
+  verificationStatus    String   @default("Registration Submitted")
+
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 }
@@ -171,4 +203,51 @@ model SessionLog {
   attendant    Attendant? @relation(fields: [attendantId], references: [id])
   attendantId  String?
   createdAt    DateTime @default(now())
+}
+
+model AttendantRegistration {
+  id                     String   @id @default(uuid())
+
+  // Section 1 — Personal Info
+  fullName               String
+  profilePhotoBase64     String?
+  dateOfBirth            String
+  age                    Int
+  mobileNumber           String   @unique
+  email                  String
+  address                String
+  city                   String
+  state                  String
+  pinCode                String
+  emergencyContact       String
+
+  // Section 2 — Service Profile
+  selectedServices       String[]
+
+  // Section 3 — Skills & Experience
+  yearsOfExperience      Int
+  languagesKnown         String[]
+  certifications         String?
+  specialSkills          String?
+  previousExperience     String?
+
+  // Section 4 — Documents (base64)
+  aadhaarBase64          String?
+  drivingLicenseBase64   String?
+  panCardBase64          String?
+  professionalCertBase64 String?
+  policeVerifBase64      String?
+
+  // Section 5 — Availability
+  workingDays            String[]
+  preferredTimeSlots     String[]
+  preferredCities        String[]
+
+  // Section 6/8 — Verification
+  status                 String   @default("Pending Verification")
+  rejectionReason        String?
+  adminNotes             String?
+
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
 }

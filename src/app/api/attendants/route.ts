@@ -5,6 +5,11 @@ import prisma from "@/lib/prisma";
 export async function GET() {
   try {
     const attendants = await prisma.attendant.findMany({
+      include: {
+        location: true,
+        account: true,
+        bookings: true,
+      },
       orderBy: { name: "asc" },
     });
 
@@ -17,6 +22,7 @@ export async function GET() {
     );
   }
 }
+
 
 // POST /api/attendants - Add a new verified attendant profile
 export async function POST(request: Request) {
