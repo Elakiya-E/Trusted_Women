@@ -1,6 +1,7 @@
 "use client";
+export const dynamic = "force-dynamic";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { 
   Check, 
@@ -240,6 +241,7 @@ export default function BookingPage() {
   };
 
   return (
+  <Suspense fallback={<div className="h-screen flex items-center justify-center">Loading...</div>}>
     <>
       <Navbar onBookNowClick={() => {}} />
       <div className="pt-24 pb-16 bg-gray-50 min-h-screen">
