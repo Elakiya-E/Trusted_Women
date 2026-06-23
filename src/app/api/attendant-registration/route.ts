@@ -104,7 +104,9 @@ export async function POST(request: Request) {
         workingDays: Array.isArray(body.workingDays) ? body.workingDays : [],
         preferredTimeSlots: Array.isArray(body.preferredTimeSlots) ? body.preferredTimeSlots : [],
         preferredCities: Array.isArray(body.preferredCities) ? body.preferredCities : [],
-        status: "Pending Verification",
+        status: "Pending Approval",
+        approvalStatus: "Pending Approval",
+        accountStatus: "Inactive",
       },
     });
 

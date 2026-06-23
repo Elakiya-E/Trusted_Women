@@ -102,9 +102,9 @@ export default function Services({ onSelectService }: ServicesProps) {
         
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-base text-primary font-bold tracking-wide uppercase">Our Services</h2>
+          <h2 className="text-base text-primary font-bold tracking-wide uppercase">Expanded Service Portfolio</h2>
           <p className="mt-2 text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight">
-            Specialized Assisted Escort & Attendant Services
+            Women-Led Attendant Solutions for Homes, Healthcare, Travel, Security and Lifestyle Support.
           </p>
           <p className="mt-4 text-lg text-gray-600">
             Carefully curated, highly reliable services staffed by verified, professional women attendants.
@@ -165,6 +165,17 @@ export default function Services({ onSelectService }: ServicesProps) {
               </motion.div>
             );
           })}
+        </div>
+
+        {/* View All Services Button */}
+        <div className="mt-16 text-center">
+          <a
+            href="/services"
+            className="inline-flex items-center space-x-2 bg-white text-primary border-2 border-primary font-bold px-8 py-3.5 rounded-full shadow hover:bg-primary hover:text-white transition-all hover:scale-105"
+          >
+            <span>View All Services</span>
+            <ArrowRight className="h-5 w-5" />
+          </a>
         </div>
 
       </div>

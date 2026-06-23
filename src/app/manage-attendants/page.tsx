@@ -82,7 +82,7 @@ export default function ManageAttendantsPage() {
   
   // Registration filters
   const [regSearch, setRegSearch] = useState("");
-  const [filterStatus, setFilterStatus] = useState("Pending Verification");
+  const [filterStatus, setFilterStatus] = useState("Pending Approval");
   const [filterCity, setFilterCity] = useState("All");
   const [filterService, setFilterService] = useState("All");
   const [filterExp, setFilterExp] = useState("All");
@@ -262,7 +262,7 @@ export default function ManageAttendantsPage() {
               }`}
             >
               Registration Approvals
-              {registrations.filter(r => r.status === "Pending Verification").length > 0 && (
+              {registrations.filter(r => r.status === "Pending Approval").length > 0 && (
                 <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
               )}
             </button>
@@ -409,7 +409,7 @@ export default function ManageAttendantsPage() {
                     className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-xs focus:border-primary focus:ring-2 focus:ring-purple-100 outline-none bg-white text-gray-700 font-medium"
                   >
                     <option value="All">All Verification Statuses</option>
-                    <option value="Pending Verification">Pending Verification</option>
+                    <option value="Pending Approval">Pending Approval</option>
                     <option value="Under Review">Under Review</option>
                     <option value="Request Changes">Request Changes</option>
                     <option value="Approved">Approved</option>

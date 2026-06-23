@@ -25,6 +25,7 @@ const sidebarLinks = [
   { label: "Admin Dashboard", href: "/admin-dashboard", icon: LayoutDashboard },
   { label: "Manage Bookings", href: "/manage-bookings", icon: CalendarCheck },
   { label: "Manage Attendants", href: "/manage-attendants", icon: Users },
+  { label: "Attendant Approvals", href: "/admin-dashboard/attendant-approvals", icon: ShieldCheck },
   { label: "Customer Verifications", href: "/admin-dashboard/customers", icon: UserCheck },
   { label: "Operations Analytics", href: "/operations-analytics", icon: BarChart3 },
   { label: "Notifications", href: "/notifications", icon: Bell },

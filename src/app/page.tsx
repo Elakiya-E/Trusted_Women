@@ -1,12 +1,12 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import BrandKeywords from "@/components/BrandKeywords";
 import Services from "@/components/Services";
 import Pricing from "@/components/Pricing";
-import BookingFlow from "@/components/BookingFlow";
 import TrustSafety from "@/components/TrustSafety";
 import Offers from "@/components/Offers";
 import KnowledgeHub from "@/components/KnowledgeHub";
@@ -16,17 +16,14 @@ import WhatsAppFloating from "@/components/WhatsAppFloating";
 import Footer from "@/components/Footer";
 
 export default function Home() {
-  const [selectedServiceId, setSelectedServiceId] = useState("airport");
+  const router = useRouter();
 
   const handleSelectService = (serviceId: string) => {
-    setSelectedServiceId(serviceId);
+    router.push(`/booking?service=${serviceId}`);
   };
 
   const handleBookNowScroll = () => {
-    const bookingSection = document.getElementById("booking");
-    if (bookingSection) {
-      bookingSection.scrollIntoView({ behavior: "smooth" });
-    }
+    router.push("/booking");
   };
 
   return (
@@ -45,9 +42,6 @@ export default function Home() {
 
         {/* Transparent Pricing & Plan Comparison */}
         <Pricing onSelectService={handleSelectService} />
-
-        {/* Interactive Booking Flow */}
-        <BookingFlow selectedServiceId={selectedServiceId} />
 
         {/* Trust & Safety Vetting Section */}
         <TrustSafety />

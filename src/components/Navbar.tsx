@@ -21,13 +21,13 @@ export default function Navbar({ onBookNowClick }: NavbarProps) {
   }, []);
 
   const navItems = [
-    { name: "Home", href: "#home" },
-    { name: "Services", href: "#services" },
-    { name: "Booking", href: "#booking" },
-    { name: "Safety", href: "#safety" },
-    { name: "Knowledge Hub", href: "#knowledge" },
-    { name: "Cities", href: "#cities" },
-    { name: "Contact", href: "#footer" },
+    { name: "Home", href: "/#home" },
+    { name: "Services", href: "/services" },
+    { name: "Booking", href: "/booking" },
+    { name: "Safety", href: "/#safety" },
+    { name: "Knowledge Hub", href: "/#knowledge" },
+    { name: "Cities", href: "/#cities" },
+    { name: "Contact", href: "/#footer" },
   ];
 
   return (
@@ -86,12 +86,12 @@ export default function Navbar({ onBookNowClick }: NavbarProps) {
               </a>
 
               {/* Book Now */}
-              <button
-                onClick={onBookNowClick}
+              <a
+                href="/booking"
                 className="bg-gradient-to-r from-primary to-secondary text-white px-4 py-2 rounded-full font-semibold text-xs shadow-sm hover:shadow-md transition-all hover:scale-105"
               >
                 Book Now
-              </button>
+              </a>
 
               {/* Attendant Login */}
               <a
@@ -154,7 +154,7 @@ export default function Navbar({ onBookNowClick }: NavbarProps) {
 
                   {/* Book Now */}
                   <a
-                    href="#booking"
+                    href="/booking"
                     onClick={() => setIsOpen(false)}
                     className="bg-gradient-to-r from-primary to-secondary text-white py-2.5 rounded-full font-bold text-center shadow-md text-sm block"
                   >

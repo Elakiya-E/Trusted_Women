@@ -169,6 +169,7 @@ model AttendantAccount {
   attendant    Attendant @relation(fields: [attendantId], references: [id])
   attendantId  String   @unique
   mobileNumber String   @unique
+  email        String   @unique @default("test@example.com")
   passwordHash String
   status       AttendantStatus @default(AVAILABLE)
   createdAt    DateTime @default(now())
@@ -215,6 +216,7 @@ model AttendantRegistration {
   age                    Int
   mobileNumber           String   @unique
   email                  String
+  password               String   @default("password123")
   address                String
   city                   String
   state                  String
@@ -244,9 +246,12 @@ model AttendantRegistration {
   preferredCities        String[]
 
   // Section 6/8 — Verification
-  status                 String   @default("Pending Verification")
+  status                 String   @default("Pending Approval")
   rejectionReason        String?
   adminNotes             String?
+  approvalStatus         String   @default("Pending Approval")
+  approvedAt             DateTime?
+  accountStatus          String   @default("Inactive")
 
   createdAt              DateTime @default(now())
   updatedAt              DateTime @updatedAt

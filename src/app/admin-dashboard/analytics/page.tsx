@@ -49,12 +49,14 @@ const cityData = [
 const serviceData = [
   { name: "Elderly Care", value: 30 },
   { name: "Hospital Assistance", value: 25 },
+  { name: "Tailor at Home", value: 22 },
   { name: "Airport Pickup", value: 20 },
-  { name: "Railway Pickup", value: 15 },
-  { name: "Women Drivers", value: 10 },
+  { name: "Post-Natal Care", value: 18 },
+  { name: "Event Managers", value: 15 },
+  { name: "Appliance Help", value: 10 },
 ];
 
-const COLORS = ["#4f46e5", "#10b981", "#f59e0b", "#ef4444", "#6366f1"];
+const COLORS = ["#4f46e5", "#10b981", "#f59e0b", "#ef4444", "#6366f1", "#ec4899", "#8b5cf6"];
 
 export default function AdminAnalytics() {
   // In a production version, fetch data from /api/analytics/* endpoints

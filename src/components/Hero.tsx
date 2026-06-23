@@ -13,7 +13,21 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { PhoneCall, CheckCircle2 } from "lucide-react";
 
-const heroImages = ["/img8.png", "/img8.2.png", "/img83.png", "/img84.png"];
+const heroImages = [
+  "/aa.png",
+  "/bb.png",
+  "/cc.png",
+  "/dd.png",
+  "/ee.png",
+  "/ff.png",
+  "/img8.png",
+  "/img8.2.png",
+  "/img83.png",
+  "/img84.png",
+  "/rail.png",
+  "/to3.png",
+  "/to4.png"
+];
 
 interface HeroProps {
   onBookNowClick: () => void;
@@ -25,7 +39,7 @@ export default function Hero({ onBookNowClick }: HeroProps) {
   useEffect(() => {
     const timer = window.setInterval(() => {
       setCurrentIndex((index) => (index + 1) % heroImages.length);
-    }, 4000);
+    }, 3000);
     return () => window.clearInterval(timer);
   }, []);
 
@@ -50,10 +64,10 @@ export default function Hero({ onBookNowClick }: HeroProps) {
               alt={`Hero background ${idx + 1}`}
               fill
               sizes="100vw"
-              className="object-cover object-center"
+              className="object-cover object-top"
               priority={idx === 0}
             />
-            <div className="absolute inset-0 bg-black/20" />
+            <div className="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-slate-950/50 to-transparent" />
           </motion.div>
         ))}
       </div>
@@ -65,14 +79,14 @@ export default function Hero({ onBookNowClick }: HeroProps) {
           transition={{ duration: 0.9, ease: "easeOut" }}
           className="w-full max-w-[1280px]"
         >
-          <div className="w-full max-w-3xl rounded-[2rem] border border-white/15 bg-slate-950/35 p-8 shadow-[0_40px_120px_-60px_rgba(15,23,42,0.8)] backdrop-blur-xl">
-            <span className="mb-6 inline-flex rounded-full bg-white/15 px-4 py-2 text-sm font-semibold uppercase tracking-[0.16em] text-slate-100">
+          <div className="w-full max-w-3xl p-8 drop-shadow-xl">
+            <span className="mb-6 inline-flex rounded-full bg-white/20 px-4 py-2 text-sm font-semibold uppercase tracking-[0.16em] text-white shadow-sm backdrop-blur-md">
               Premium care for every stage
             </span>
-            <h1 className="text-4xl font-semibold leading-tight tracking-tight text-white sm:text-5xl">
+            <h1 className="text-4xl font-bold leading-tight tracking-tight text-white drop-shadow-md sm:text-5xl">
               Trusted Women Attendants for Every Stage of Care
             </h1>
-            <p className="mt-5 max-w-2xl text-base leading-7 text-slate-100/90 sm:text-lg">
+            <p className="mt-5 max-w-2xl text-base leading-7 text-white drop-shadow sm:text-lg font-medium">
               Safe, verified and compassionate support for elderly care, hospital assistance, travel support and home services.
             </p>
 
@@ -81,7 +95,7 @@ export default function Hero({ onBookNowClick }: HeroProps) {
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
                 onClick={onBookNowClick}
-                className="inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-sky-500 to-cyan-500 px-8 py-3 text-base font-semibold text-white shadow-lg shadow-cyan-500/30 transition duration-300 hover:from-sky-400 hover:to-cyan-400"
+                className="inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-sky-500 to-cyan-500 px-8 py-3 text-base font-semibold text-white shadow-lg shadow-cyan-500/40 transition duration-300 hover:from-sky-400 hover:to-cyan-400"
               >
                 Book a Service
               </motion.button>
@@ -90,7 +104,7 @@ export default function Hero({ onBookNowClick }: HeroProps) {
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
                 href="tel:+919876543210"
-                className="inline-flex items-center justify-center rounded-2xl border border-white/25 bg-white/10 px-8 py-3 text-base font-semibold text-white transition duration-300 hover:border-white/40 hover:bg-white/20"
+                className="inline-flex items-center justify-center rounded-2xl border border-white/40 bg-black/30 px-8 py-3 text-base font-semibold text-white shadow-lg backdrop-blur-sm transition duration-300 hover:border-white/60 hover:bg-black/50"
               >
                 <PhoneCall className="mr-2 h-4 w-4" />
                 Call Support
@@ -106,9 +120,9 @@ export default function Hero({ onBookNowClick }: HeroProps) {
               ].map((text) => (
                 <div
                   key={text}
-                  className="inline-flex items-center gap-2 rounded-2xl bg-white/10 px-4 py-3 text-sm font-medium text-slate-100 backdrop-blur"
+                  className="inline-flex items-center gap-2 rounded-2xl bg-black/40 px-4 py-3 text-sm font-semibold text-white shadow-md backdrop-blur-md"
                 >
-                  <CheckCircle2 className="h-4 w-4 text-emerald-300" />
+                  <CheckCircle2 className="h-4 w-4 text-emerald-400" />
                   {text}
                 </div>
               ))}

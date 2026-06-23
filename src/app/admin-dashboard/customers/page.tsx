@@ -44,8 +44,8 @@ export default function ManageCustomers() {
     }
   };
 
-  const filteredCustomers = customers.filter(c => 
-    c.name.toLowerCase().includes(search.toLowerCase()) || 
+  const filteredCustomers = customers.filter(c =>
+    c.name.toLowerCase().includes(search.toLowerCase()) ||
     c.phone.includes(search)
   );
 
@@ -113,7 +113,7 @@ export default function ManageCustomers() {
                         </td>
                         <td className="px-6 py-4">
                           {customer.idDocumentBase64 ? (
-                            <button 
+                            <button
                               onClick={() => setPreviewDoc(customer.idDocumentBase64)}
                               className="inline-flex items-center gap-1.5 text-primary hover:text-purple-800 font-medium bg-purple-50 hover:bg-purple-100 px-3 py-1.5 rounded-lg transition-colors"
                             >
@@ -183,7 +183,7 @@ export default function ManageCustomers() {
                   <FileText className="h-5 w-5 text-primary" />
                   Document Preview
                 </h3>
-                <button 
+                <button
                   onClick={() => setPreviewDoc(null)}
                   className="p-1.5 hover:bg-gray-200 rounded-lg transition-colors"
                 >
@@ -198,7 +198,7 @@ export default function ManageCustomers() {
                 )}
               </div>
               <div className="px-6 py-4 border-t bg-gray-50 flex justify-end">
-                <button 
+                <button
                   onClick={() => setPreviewDoc(null)}
                   className="px-6 py-2 bg-gray-800 hover:bg-gray-900 text-white font-semibold rounded-xl text-sm transition-colors"
                 >

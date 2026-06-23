@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-import { Eye, EyeOff, ShieldCheck, Lock, Phone } from "lucide-react";
+import { Eye, EyeOff, ShieldCheck, Lock, Mail } from "lucide-react";
 
 export default function AttendantLoginPage() {
-  const [mobile, setMobile] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -14,16 +14,37 @@ export default function AttendantLoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    if (!mobile.trim() || !password.trim()) {
+    if (!email.trim() || !password.trim()) {
       setError("Please fill in all fields.");
       return;
     }
     setLoading(true);
-    // Simulated auth — replace with real API call
-    setTimeout(() => {
+    
+    try {
+      const res = await fetch("/api/auth/attendant/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
+      });
+      
+      const data = await res.json();
+      
+      if (res.ok) {
+        // Successful login
+        localStorage.setItem("withyours_attendant_session", JSON.stringify({
+          email: data.attendant.email,
+          id: data.attendant.id,
+          name: data.attendant.name,
+        }));
+        window.location.href = "/attendant-dashboard";
+      } else {
+        setError(data.error || "Login failed");
+      }
+    } catch (err) {
+      setError("An unexpected error occurred. Please try again.");
+    } finally {
       setLoading(false);
-      window.location.href = "/attendant-dashboard";
-    }, 1200);
+    }
   };
 
   return (
@@ -52,19 +73,19 @@ export default function AttendantLoginPage() {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-5">
-              {/* Mobile Number */}
+              {/* Email Address */}
               <div>
                 <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">
-                  Mobile Number
+                  Email Address
                 </label>
                 <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <input
-                    id="mobile"
-                    type="tel"
-                    value={mobile}
-                    onChange={(e) => setMobile(e.target.value)}
-                    placeholder="+91 98765 43210"
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="maha@gmail.com"
                     required
                     className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 focus:border-primary focus:ring-2 focus:ring-purple-100 outline-none text-gray-900 text-sm bg-gray-50"
                   />
@@ -135,10 +156,29 @@ export default function AttendantLoginPage() {
               </button>
             </form>
 
-            <p className="mt-6 text-center text-xs text-gray-400 border-t border-gray-100 pt-5">
-              For account access issues, contact your supervisor or call{" "}
-              <span className="font-medium text-gray-500">+91-XXXXX-XXXXX</span>
-            </p>
+            <div className="mt-6 text-center">
+              <p className="text-sm text-gray-600 mb-3">
+                New attendant? Register here
+              </p>
+              <a 
+                href="/attendant-register"
+                className="w-full inline-block bg-white border-2 border-primary text-primary py-2.5 rounded-xl font-semibold text-sm hover:bg-primary/5 transition-colors"
+              >
+                Register Now
+              </a>
+            </div>
+
+            <div className="mt-6 text-center text-xs text-gray-500 border-t border-gray-100 pt-5 space-y-2">
+              <p>
+                Don't have an account? <a href="/attendant-register" className="text-primary font-medium hover:underline">Register Now</a>
+              </p>
+              <p>
+                Already approved? <a href="/attendant-login" className="text-primary font-medium hover:underline">Login</a>
+              </p>
+              <p className="pt-2 text-gray-400">
+                For account access issues, contact your supervisor or call +91-XXXXX-XXXXX
+              </p>
+            </div>
           </div>
         </div>
 
@@ -149,3 +189,4 @@ export default function AttendantLoginPage() {
     </div>
   );
 }
+

@@ -105,41 +105,112 @@ export async function PATCH(
           data: {
             status,
             adminNotes: adminNotes || registration.adminNotes,
+            approvalStatus: "Approved",
+            approvedAt: new Date(),
+            accountStatus: "Active",
           },
         });
 
-        // 2. Create Attendant profile
-        const newAttendant = await tx.attendant.create({
-          data: {
-            name: registration.fullName,
-            role,
-            experience: `${registration.yearsOfExperience} Years`,
-            languages: registration.languagesKnown,
-            rating: 5.0, // New attendants start with 5.0 rating
-            certifications: certificationsArray,
-            bgGradient: randomGradient,
-          },
+        // Check if Attendant already exists by email
+        let attendant = await tx.attendant.findFirst({
+          where: { email: registration.email }
         });
 
-        // 3. Create Attendant Account for login
-        await tx.attendantAccount.create({
-          data: {
-            attendantId: newAttendant.id,
-            mobileNumber: registration.mobileNumber,
-            passwordHash: "pbkdf2_sha256$260000$default_salt$dummy_hash", // Placeholder hash
-            status: "AVAILABLE",
-          },
+        const attendantData = {
+          name: registration.fullName,
+          role,
+          experience: `${registration.yearsOfExperience} Years`,
+          languages: registration.languagesKnown,
+          rating: 5.0,
+          certifications: certificationsArray,
+          bgGradient: randomGradient,
+          email: registration.email,
+          address: registration.address,
+          state: registration.state,
+          pinCode: registration.pinCode,
+          emergencyContact: registration.emergencyContact,
+          profilePhotoBase64: registration.profilePhotoBase64,
+          selectedServices: registration.selectedServices,
+          aadhaarBase64: registration.aadhaarBase64,
+          aadhaarStatus: registration.aadhaarBase64 ? "Uploaded" : "Pending",
+          panBase64: registration.panCardBase64,
+          panStatus: registration.panCardBase64 ? "Uploaded" : "Pending",
+          dlBase64: registration.drivingLicenseBase64,
+          dlStatus: registration.drivingLicenseBase64 ? "Uploaded" : "Pending",
+          certificatesBase64: registration.professionalCertBase64,
+          certificatesStatus: registration.professionalCertBase64 ? "Uploaded" : "Pending",
+          policeVerifBase64: registration.policeVerifBase64,
+          policeVerifStatus: registration.policeVerifBase64 ? "Uploaded" : "Pending",
+          workingDays: registration.workingDays,
+          workingHours: registration.preferredTimeSlots,
+          preferredCities: registration.preferredCities,
+          verificationStatus: "Approved",
+        };
+
+        if (!attendant) {
+          attendant = await tx.attendant.create({
+            data: attendantData,
+          });
+        } else {
+          attendant = await tx.attendant.update({
+            where: { id: attendant.id },
+            data: attendantData,
+          });
+        }
+
+        // Check if Attendant Account already exists by email or mobileNumber
+        let account = await tx.attendantAccount.findFirst({
+          where: {
+            OR: [
+              { email: registration.email },
+              { mobileNumber: registration.mobileNumber }
+            ]
+          }
         });
 
-        // 4. Create Attendant Location
-        await tx.attendantLocation.create({
-          data: {
-            attendantId: newAttendant.id,
-            city: registration.city,
-            latitude: coords.lat,
-            longitude: coords.lng,
-          },
+        const accountData = {
+          attendantId: attendant.id,
+          mobileNumber: registration.mobileNumber,
+          email: registration.email,
+          passwordHash: registration.password,
+          status: "AVAILABLE",
+        } as const;
+
+        if (!account) {
+          await tx.attendantAccount.create({
+            data: accountData,
+          });
+        } else {
+          await tx.attendantAccount.update({
+            where: { id: account.id },
+            data: accountData,
+          });
+        }
+
+        // Check if Location already exists for this attendant
+        let location = await tx.attendantLocation.findUnique({
+          where: { attendantId: attendant.id },
         });
+
+        if (!location) {
+          await tx.attendantLocation.create({
+            data: {
+              attendantId: attendant.id,
+              city: registration.city,
+              latitude: coords.lat,
+              longitude: coords.lng,
+            },
+          });
+        } else {
+          await tx.attendantLocation.update({
+            where: { attendantId: attendant.id },
+            data: {
+              city: registration.city,
+              latitude: coords.lat,
+              longitude: coords.lng,
+            },
+          });
+        }
 
         // 5. Create Notification
         await tx.notification.create({
@@ -159,6 +230,8 @@ export async function PATCH(
           status,
           rejectionReason: rejectionReason || null,
           adminNotes: adminNotes || null,
+          approvalStatus: status === "Rejected" ? "Rejected" : status,
+          accountStatus: "Inactive",
         },
       });
 

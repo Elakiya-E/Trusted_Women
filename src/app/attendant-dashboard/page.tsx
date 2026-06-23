@@ -158,6 +158,27 @@ export default function AttendantDashboard() {
   };
 
   const fetchData = async () => {
+    // 1. Initial check for session in localStorage
+    const sessionStr = localStorage.getItem("withyours_attendant_session");
+    if (!sessionStr) {
+      window.location.href = "/attendant-login";
+      return;
+    }
+
+    let loggedInId = "";
+    try {
+      const sessionObj = JSON.parse(sessionStr);
+      loggedInId = sessionObj?.id || "";
+    } catch {
+      window.location.href = "/attendant-login";
+      return;
+    }
+
+    if (!loggedInId) {
+      window.location.href = "/attendant-login";
+      return;
+    }
+
     try {
       const attendantsRes = await fetch("/api/attendants");
       const bookingsRes = await fetch("/api/bookings");
@@ -166,11 +187,19 @@ export default function AttendantDashboard() {
         const attendantsData = await attendantsRes.json();
         const bookingsData = await bookingsRes.json();
         
+        // Verify that this attendant is approved (exists in the active attendants list)
+        const exists = attendantsData.some((a: any) => a.id === loggedInId);
+        if (!exists) {
+          localStorage.removeItem("withyours_attendant_session");
+          window.location.href = "/attendant-login";
+          return;
+        }
+
         setAttendants(attendantsData);
         setBookings(bookingsData);
         
-        if (attendantsData.length > 0 && !selectedAttendantId) {
-          setSelectedAttendantId(attendantsData[0].id);
+        if (!selectedAttendantId) {
+          setSelectedAttendantId(loggedInId);
         }
       }
     } catch (err) {
@@ -638,7 +667,13 @@ export default function AttendantDashboard() {
             </div>
           )}
 
-          <a href="/attendant-login" className="flex items-center space-x-1 text-xs text-gray-500 hover:text-red-500 transition-colors font-bold uppercase tracking-wider">
+          <a 
+            href="/attendant-login" 
+            onClick={() => {
+              localStorage.removeItem("withyours_attendant_session");
+            }}
+            className="flex items-center space-x-1 text-xs text-gray-500 hover:text-red-500 transition-colors font-bold uppercase tracking-wider"
+          >
             <LogOut className="h-4 w-4" />
             <span className="hidden sm:block">Logout</span>
           </a>
