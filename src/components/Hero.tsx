@@ -14,19 +14,12 @@ import { motion } from "framer-motion";
 import { PhoneCall, CheckCircle2 } from "lucide-react";
 
 const heroImages = [
-  "/aa.png",
-  "/bb.png",
-  "/cc.png",
-  "/dd.png",
-  "/ee.png",
-  "/ff.png",
-  "/img8.png",
-  "/img8.2.png",
-  "/img83.png",
-  "/img84.png",
-  "/rail.png",
-  "/to3.png",
-  "/to4.png"
+  "/E1.png",
+  "/E2.png",
+  "/E3.png",
+  "/E4.png",
+  "/E5.png",
+  "/E6.png"
 ];
 
 interface HeroProps {

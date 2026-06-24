@@ -1,16 +1,15 @@
 "use client";
-export const dynamic = "force-dynamic";
 
 import React, { useState, useEffect, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { 
-  Check, 
-  MapPin, 
-  ShieldCheck, 
-  User, 
-  Phone, 
+import {
+  Check,
+  MapPin,
+  ShieldCheck,
+  User,
+  Phone,
   Mail,
-  Loader2, 
+  Loader2,
   Clock,
   RefreshCw,
   Users
@@ -21,7 +20,9 @@ import dynamicImport from "next/dynamic";
 
 const MapComponent = dynamicImport(() => import("@/components/MapComponent"), {
   ssr: false,
-  loading: () => <div className="h-64 w-full bg-gray-100 rounded-xl animate-pulse flex items-center justify-center text-gray-400 font-medium border border-gray-200">Loading interactive map...</div>,
+  loading: () => <div className="h-64 w-full bg-gray-100 rounded-xl animate-pulse flex items-center justify-center text-gray-400 font-medium border border-gray-200">
+    Loading interactive map...
+  </div>,
 });
 
 interface DBService {
@@ -31,7 +32,7 @@ interface DBService {
   startingPrice: string;
 }
 
-export default function BookingPage() {
+export default function BookingContent() {
   const searchParams = useSearchParams();
   const initialServiceId = searchParams?.get("service");
 
@@ -70,7 +71,7 @@ export default function BookingPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [createdBooking, setCreatedBooking] = useState<any>(null);
-  
+
   // Tracking
   const [isPolling, setIsPolling] = useState(false);
   const pollTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -83,7 +84,6 @@ export default function BookingPage() {
         if (res.ok) {
           const data = await res.json();
           setServicesList(data);
-          
           if (initialServiceId) {
             const match = data.find((s: any) => s.id === initialServiceId || s.title.toLowerCase().includes(initialServiceId.toLowerCase()));
             if (match) setSelectedServiceId(match.id);
@@ -134,7 +134,6 @@ export default function BookingPage() {
     e.preventDefault();
     setIsSubmitting(true);
     setSubmitError("");
-
     try {
       if (!customerName || !phoneNumber || !selectedServiceId || !date || !time || !location || lat === null || lng === null) {
         throw new Error("Please fill in all required fields and select a location on the map.");
@@ -182,10 +181,10 @@ export default function BookingPage() {
 
       const booking = await response.json();
       setCreatedBooking(booking);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err: any) {
       setSubmitError(err.message || "Something went wrong.");
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } finally {
       setIsSubmitting(false);
     }
@@ -237,23 +236,21 @@ export default function BookingPage() {
     if (s === "accepted") return 3;
     if (s === "in progress" || s === "in_progress") return 4;
     if (s === "completed") return 5;
+    return 0;
+  };
 
-    return 0;;
-}
+  // Render UI (same as previous page component)
   return (
-  <Suspense fallback={<div className="h-screen flex items-center justify-center">Loading...</div>}>
     <>
       <Navbar onBookNowClick={() => {}} />
       <div className="pt-24 pb-16 bg-gray-50 min-h-screen">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          
           <div className="text-center mb-10">
             <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 mb-3">Book a Women Attendant Service</h1>
             <p className="text-lg text-slate-600 max-w-2xl mx-auto">
               Book verified women attendants for elderly care, hospital assistance, travel support and home services.
             </p>
           </div>
-
           {createdBooking ? (
             <div className="bg-white rounded-3xl p-6 sm:p-10 shadow-lg border border-gray-100">
               <div className="text-center mb-8">
@@ -263,14 +260,13 @@ export default function BookingPage() {
                 <h3 className="text-2xl font-bold text-gray-900">Request Submitted Successfully!</h3>
                 <p className="text-gray-500 mt-2">Your booking ID is <span className="font-mono font-bold text-gray-800">{createdBooking.id}</span></p>
               </div>
-
               <div className="bg-gray-50 rounded-2xl border border-gray-100 p-6 shadow-sm mb-8">
                 <div className="flex items-center justify-between mb-6">
                   <h4 className="font-bold text-gray-800 flex items-center gap-1.5">
                     <Clock className="h-5 w-5 text-primary" />
                     Live Tracking
                   </h4>
-                  <button 
+                  <button
                     onClick={fetchLatestStatus}
                     disabled={isPolling}
                     className="flex items-center space-x-1 text-sm text-primary font-semibold hover:underline disabled:opacity-50"
@@ -279,7 +275,6 @@ export default function BookingPage() {
                     <span>Refresh</span>
                   </button>
                 </div>
-
                 <div className="relative border-l-2 border-gray-200 pl-6 ml-3 space-y-8">
                   {timelineSteps.map((step, idx) => {
                     const status = createdBooking?.status ?? "";
@@ -292,9 +287,7 @@ export default function BookingPage() {
                           {isDone ? <Check className="h-3 w-3 stroke-[3]" /> : <span className="text-[10px] font-bold">{idx + 1}</span>}
                         </span>
                         <div>
-                          <h5 className={`font-bold text-sm ${isCurrent ? "text-primary" : isDone ? "text-gray-800" : "text-gray-400"}`}>
-                            {step.label}
-                          </h5>
+                          <h5 className={`font-bold text-sm ${isCurrent ? "text-primary" : isDone ? "text-gray-800" : "text-gray-400"}`}>{step.label}</h5>
                           <p className="text-xs text-gray-500 mt-0.5">{step.desc}</p>
                         </div>
                       </div>
@@ -302,7 +295,6 @@ export default function BookingPage() {
                   })}
                 </div>
               </div>
-
               {createdBooking.attendant && (
                 <div className="p-4 bg-purple-50 rounded-xl border border-purple-100 flex items-center space-x-4">
                   <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
@@ -317,14 +309,12 @@ export default function BookingPage() {
             </div>
           ) : (
             <form onSubmit={handleSubmitBooking} className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
-              
               {submitError && (
                 <div className="m-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl flex items-start gap-3">
                   <ShieldCheck className="h-5 w-5 shrink-0 mt-0.5" />
                   <p className="font-medium text-sm">{submitError}</p>
                 </div>
               )}
-
               <div className="p-6 sm:p-10 space-y-12">
                 {/* SECTION 1: Booking Information */}
                 <section>
@@ -347,7 +337,6 @@ export default function BookingPage() {
                     </div>
                   </div>
                 </section>
-
                 {/* SECTION 2: Select Service */}
                 <section>
                   <h2 className="text-xl font-bold text-slate-800 mb-5 pb-2 border-b flex items-center gap-2">
@@ -355,7 +344,7 @@ export default function BookingPage() {
                     Select Service
                   </h2>
                   {loadingServices ? (
-                    <div className="flex items-center gap-2 text-slate-500"><Loader2 className="w-5 h-5 animate-spin" /> Loading services...</div>
+                    <div className="flex items-center gap-2 text-slate-500"><Loader2 className="w-5 h-5 animate-spin"/> Loading services...</div>
                   ) : (
                     <div className="grid sm:grid-cols-2 gap-4">
                       {servicesList.map((service) => (
@@ -375,7 +364,6 @@ export default function BookingPage() {
                     </div>
                   )}
                 </section>
-
                 {/* SECTION 3: Location Selection */}
                 <section>
                   <h2 className="text-xl font-bold text-slate-800 mb-5 pb-2 border-b flex items-center gap-2">
@@ -394,13 +382,13 @@ export default function BookingPage() {
                     </div>
                     <div>
                       <label className="block text-sm font-semibold text-slate-700 mb-1.5 flex items-center gap-1.5"><MapPin className="w-4 h-4 text-slate-400"/> Pin Exact Location</label>
-                      <MapComponent 
+                      <MapComponent
                         defaultCity={city}
                         onLocationSelect={(newLat, newLng, address) => {
                           setLat(newLat);
                           setLng(newLng);
                           setLocation(address);
-                        }} 
+                        }}
                       />
                       {lat && lng && (
                         <div className="mt-4 p-4 bg-emerald-50 text-emerald-800 rounded-xl border border-emerald-100 flex items-start gap-3">
@@ -415,7 +403,6 @@ export default function BookingPage() {
                     </div>
                   </div>
                 </section>
-
                 {/* SECTION 4: Schedule Service */}
                 <section>
                   <h2 className="text-xl font-bold text-slate-800 mb-5 pb-2 border-b flex items-center gap-2">
@@ -433,29 +420,24 @@ export default function BookingPage() {
                     </div>
                   </div>
                 </section>
-
                 {/* SECTION 5: Additional Requirements */}
                 <section>
                   <h2 className="text-xl font-bold text-slate-800 mb-5 pb-2 border-b flex items-center gap-2">
                     <span className="bg-primary/10 text-primary w-8 h-8 rounded-full flex items-center justify-center text-sm font-black">5</span>
                     Additional Requirements
                   </h2>
-                  <textarea rows={4} value={customReqs} onChange={(e) => setCustomReqs(e.target.value)} placeholder="Any special instructions or customer notes..." className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary outline-none transition-all resize-none"></textarea>
+                  <textarea rows={4} value={customReqs} onChange={(e) => setCustomReqs(e.target.value)} placeholder="Any special instructions or customer notes..." className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary outline-none transition-all resize-none" />
                 </section>
-
                 {/* SECTION 6: Customer Verification */}
                 <section>
                   <h2 className="text-xl font-bold text-slate-800 mb-5 pb-2 border-b flex items-center gap-2">
                     <span className="bg-primary/10 text-primary w-8 h-8 rounded-full flex items-center justify-center text-sm font-black">6</span>
                     Customer Verification
                   </h2>
-                  
                   {isVerifying ? (
-                    <div className="flex items-center gap-2 text-slate-500 p-4 bg-slate-50 rounded-xl"><Loader2 className="w-5 h-5 animate-spin" /> Checking verification status...</div>
+                    <div className="flex items-center gap-2 text-slate-500 p-4 bg-slate-50 rounded-xl"><Loader2 className="w-5 h-5 animate-spin"/> Checking verification status...</div>
                   ) : !phoneNumber || phoneNumber.length < 10 ? (
-                    <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-500">
-                      Please enter a valid mobile number in Section 1 to check verification status.
-                    </div>
+                    <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-500">Please enter a valid mobile number in Section 1 to check verification status.</div>
                   ) : verificationStatus === "VERIFIED" ? (
                     <div className="bg-green-50 border border-green-200 text-green-800 p-5 rounded-xl flex items-center gap-4">
                       <ShieldCheck className="h-8 w-8 text-green-600 flex-shrink-0" />
@@ -502,8 +484,6 @@ export default function BookingPage() {
                   )}
                 </section>
               </div>
-
-              {/* SECTION 7: BOOKING SUBMISSION */}
               <div className="p-6 sm:p-10 bg-slate-50 border-t border-slate-100 flex justify-end">
                 <button
                   type="submit"
@@ -511,20 +491,21 @@ export default function BookingPage() {
                   className="w-full sm:w-auto bg-gradient-to-r from-primary to-secondary text-white font-bold px-10 py-4 rounded-xl shadow-lg shadow-primary/30 hover:shadow-xl hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
                 >
                   {isSubmitting ? (
-                    <><Loader2 className="h-5 w-5 animate-spin" /> Submitting Request...</>
+                    <>
+                      <Loader2 className="h-5 w-5 animate-spin" /> Submitting Request...
+                    </>
                   ) : (
-                    <><ShieldCheck className="h-5 w-5" /> Submit Booking Request</>
+                    <>
+                      <ShieldCheck className="h-5 w-5" /> Submit Booking Request
+                    </>
                   )}
                 </button>
               </div>
-
             </form>
           )}
-
         </div>
       </div>
       <Footer />
     </>
-    </Suspense>
   );
 }

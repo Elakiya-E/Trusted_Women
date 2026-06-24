@@ -17,6 +17,9 @@ interface AttendantRow {
   experience: string;
   languages: string;
   assignedServices: number;
+  workingDays: string[];
+  workingHours: string;
+  preferredCities: string[];
 }
 
 interface Registration {
@@ -75,17 +78,21 @@ export default function ManageAttendantsPage() {
   const [loadingActive, setLoadingActive] = useState(true);
   const [errorActive, setErrorActive] = useState<string | null>(null);
 
+
   // State for registrations tab
   const [registrations, setRegistrations] = useState<Registration[]>([]);
   const [loadingReg, setLoadingReg] = useState(true);
   const [errorReg, setErrorReg] = useState<string | null>(null);
   
-  // Registration filters
-  const [regSearch, setRegSearch] = useState("");
-  const [filterStatus, setFilterStatus] = useState("Pending Approval");
-  const [filterCity, setFilterCity] = useState("All");
-  const [filterService, setFilterService] = useState("All");
-  const [filterExp, setFilterExp] = useState("All");
+
+  const [regSearch, setRegSearch] = useState('');
+  const [filterStatus, setFilterStatus] = useState('All');
+  const [filterCity, setFilterCity] = useState('All');
+  const [filterService, setFilterService] = useState('All');
+  const [filterExp, setFilterExp] = useState('All');
+  const [filterWorkingDay, setFilterWorkingDay] = useState('All');
+  const [filterWorkingHours, setFilterWorkingHours] = useState('All');
+  const [filterPreferredCity, setFilterPreferredCity] = useState('All');
 
   // Modals / Action States
   const [selectedReg, setSelectedReg] = useState<Registration | null>(null);
@@ -124,6 +131,9 @@ export default function ManageAttendantsPage() {
           experience: a.experience,
           languages: Array.isArray(a.languages) ? a.languages.join(", ") : "",
           assignedServices: a.bookings?.length || 0,
+          workingDays: a.workingDays || [],
+          workingHours: a.workingHours || "",
+          preferredCities: a.preferredCities || [],
         };
       });
 
@@ -191,11 +201,27 @@ export default function ManageAttendantsPage() {
     }
   };
 
+  // Compute unique working hours options for filter
+  const workingHoursOptions = React.useMemo(() => {
+    const hrs = attendants
+      .map((a) => a.workingHours)
+      .filter((h) => typeof h === "string" && h.trim() !== "");
+    return Array.from(new Set(hrs));
+  }, [attendants]);
+
   // Active attendants filtering
-  const filteredAttendants = attendants.filter((a) =>
-    a.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    a.location.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredAttendants = attendants.filter((a) => {
+    const matchesSearch =
+      a.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      a.location.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesDay =
+      filterWorkingDay === "All" || (a.workingDays && a.workingDays.includes(filterWorkingDay));
+    const matchesHours =
+      filterWorkingHours === "All" || a.workingHours === filterWorkingHours;
+    const matchesCity =
+      filterPreferredCity === "All" || (a.preferredCities && a.preferredCities.includes(filterPreferredCity));
+    return matchesSearch && matchesDay && matchesHours && matchesCity;
+  });
 
   // Registrations filtering
   const filteredRegistrations = registrations.filter((r) => {
@@ -288,16 +314,59 @@ export default function ManageAttendantsPage() {
               })}
             </div>
 
-            {/* Search */}
-            <div className="relative max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search by name or location..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:border-primary focus:ring-2 focus:ring-purple-100 outline-none bg-white transition-all"
-              />
+            {/* Search and Filters */}
+            <div className="flex flex-col md:flex-row md:items-center md:space-x-4 space-y-2 md:space-y-0">
+              {/* Search */}
+              <div className="relative flex-1 max-w-md">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search by name or location..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:border-primary focus:ring-2 focus:ring-purple-100 outline-none bg-white transition-all"
+                />
+              </div>
+              {/* Working Day Filter */}
+              <select
+                value={filterWorkingDay}
+                onChange={(e) => setFilterWorkingDay(e.target.value)}
+                className="w-full md:w-auto px-3 py-2.5 rounded-xl border border-gray-200 text-xs focus:border-primary focus:ring-2 focus:ring-purple-100 outline-none bg-white text-gray-700 font-medium"
+              >
+                <option value="All">All Days</option>
+                <option value="Monday">Monday</option>
+                <option value="Tuesday">Tuesday</option>
+                <option value="Wednesday">Wednesday</option>
+                <option value="Thursday">Thursday</option>
+                <option value="Friday">Friday</option>
+                <option value="Saturday">Saturday</option>
+                <option value="Sunday">Sunday</option>
+              </select>
+              {/* Working Hours Filter */}
+              <select
+                  value={filterWorkingHours}
+                  onChange={(e) => setFilterWorkingHours(e.target.value)}
+                  className="w-full md:w-auto px-3 py-2.5 rounded-xl border border-gray-200 text-xs focus:border-primary focus:ring-2 focus:ring-purple-100 outline-none bg-white text-gray-700 font-medium"
+                >
+                  <option value="All">All Hours</option>
+                  {workingHoursOptions.map((h) => (
+                    <option key={h} value={h}>
+                      {h}
+                    </option>
+                  ))}
+                </select>
+              {/* Preferred City Filter */}
+              <select
+                value={filterPreferredCity}
+                onChange={(e) => setFilterPreferredCity(e.target.value)}
+                className="w-full md:w-auto px-3 py-2.5 rounded-xl border border-gray-200 text-xs focus:border-primary focus:ring-2 focus:ring-purple-100 outline-none bg-white text-gray-700 font-medium"
+              >
+                <option value="All">All Cities</option>
+                <option value="Chennai">Chennai</option>
+                <option value="Bengaluru">Bengaluru</option>
+                <option value="Coimbatore">Coimbatore</option>
+                <option value="Hyderabad">Hyderabad</option>
+              </select>
             </div>
 
             {/* Table or loader */}
@@ -327,6 +396,9 @@ export default function ManageAttendantsPage() {
                       <tr className="bg-gray-50/70 border-b border-gray-100">
                         <th className="px-5 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Name</th>
                         <th className="px-5 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Location</th>
+                        <th className="px-5 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Working Days</th>
+                        <th className="px-5 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Working Hours</th>
+                        <th className="px-5 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Preferred Cities</th>
                         <th className="px-5 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
                         <th className="px-5 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Experience</th>
                         <th className="px-5 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Languages</th>
@@ -336,7 +408,7 @@ export default function ManageAttendantsPage() {
                     <tbody className="divide-y divide-gray-50">
                       {filteredAttendants.length === 0 ? (
                         <tr>
-                          <td colSpan={6} className="px-5 py-10 text-center text-gray-400 text-sm font-medium">
+                          <td colSpan={9} className="px-5 py-10 text-center text-gray-400 text-sm font-medium">
                             No attendants found matching the query.
                           </td>
                         </tr>
@@ -355,6 +427,15 @@ export default function ManageAttendantsPage() {
                               <span className="flex items-center text-sm text-gray-600 font-medium">
                                 <MapPin className="h-3.5 w-3.5 mr-1 text-gray-400 shrink-0" />{a.location}
                               </span>
+                            </td>
+                            <td className="px-5 py-4">
+                              {a.workingDays && a.workingDays.length > 0 ? a.workingDays.join(', ') : '-'}
+                            </td>
+                            <td className="px-5 py-4">
+                              {a.workingHours || '-'}
+                            </td>
+                            <td className="px-5 py-4">
+                              {a.preferredCities && a.preferredCities.length > 0 ? a.preferredCities.join(', ') : '-'}
                             </td>
                             <td className="px-5 py-4">
                               <span className={`inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-bold ${statusStyles[a.availability]}`}>

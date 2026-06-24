@@ -80,11 +80,8 @@ model Attendant {
   policeVerifBase64     String?
   policeVerifStatus     String   @default("Pending")
 
-  // Scheduler Preferences
-  workingDays           String[]
-  workingHours          String[]
-  preferredCities       String[]
-
+  status               AttendantStatus @default(AVAILABLE)
+  availabilityPercentage Float @default(0)
   // Verification
   verificationStatus    String   @default("Registration Submitted")
 
